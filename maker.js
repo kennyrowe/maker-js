@@ -54,7 +54,7 @@ dapple['dappsys'] = (function builder () {
           },
           'multisig': {
             'class': 'DSEasyMultisig',
-            'address': '0xcd85c33878a7f378483c6422eee32631ea6f8001'
+            'address': '0x8592eE0C5Db5CaAD21e70D07c911Cc2a87E84775'
           },
           'echo': {
             'class': 'DSEcho',
@@ -98,7 +98,7 @@ dapple['dappsys'] = (function builder () {
           },
           'multisig': {
             'class': 'DSEasyMultisig',
-            'address': '0xe02640be68df835aa3327ea6473c02c8f6c3815a'
+            'address': '0x7bb0b08587b8a6b8945e09f1baca426558b0f06a'
           },
           'echo': {
             'class': 'DSEcho',
@@ -4705,5 +4705,7 @@ dapple['maker'] = (function builder () {
 })();
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = dapple['dappsys'];
+  module.exports = {}
+  module.exports.dapple = dapple['dappsys']; 
+  module.exports.maker = dapple['maker'];
 }
