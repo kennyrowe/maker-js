@@ -1,6 +1,6 @@
-##### Maker on SLACK - join us
+##### Join Our Chat
 ------
-[![Slack Status](http://slack.makerdao.com/badge.svg)](https:/slack.makerdao.com)
+[![MakerDAO](https://makerdao.com/splash/images/logo.svg)](https://chat.makerdao.com/channel/general)
 
 # MakerJS
 
