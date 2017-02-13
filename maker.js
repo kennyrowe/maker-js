@@ -4470,17 +4470,28 @@ dapple['maker'] = (function builder () {
     this.ActionTriggered = this._multisig.Triggered.bind(this._multisig);
   };
 
-  MakerAdmin.prototype.proposeAction = function (
-      contract, func, args, value, opts, cb) {
-    var sanitized = sanitize(this._web3, opts, cb);
-    opts = sanitized.opts;
-    cb = sanitized.cb;
-
+  MakerAdmin.prototype.getData = function (contract, func, args) {
     if (typeof contract === 'string') {
       contract = this._stringToContract(contract);
     }
+    return this._constructTransactionData(contract, func, args);
+  };
 
-    var proposalData = this._constructProposalData(contract, func, args);
+  MakerAdmin.prototype.proposeAction = function (
+      contract, func, args, value, opts, cb) {
+    if (typeof contract === 'string') {
+      contract = this._stringToContract(contract);
+    }
+    var proposalData = this.getData(contract, func, args, value, opts);
+    return this.proposeRawAction(
+        contract.address, proposalData, value, opts, cb);
+  };
+
+  MakerAdmin.prototype.proposeRawAction = function (
+      address, proposalData, value, opts, cb) {
+    var sanitized = sanitize(this._web3, opts, cb);
+    opts = sanitized.opts;
+    cb = sanitized.cb;
 
     var filter = this._multisig.Proposed(
         {calldata: proposalData},
@@ -4490,7 +4501,7 @@ dapple['maker'] = (function builder () {
           cb(null, evt.args.action_id);
         });
 
-    return this._multisig.propose(contract.address, proposalData, value, opts);
+    return this._multisig.propose(address, proposalData, value, opts);
   };
 
   MakerAdmin.prototype.confirmAction = function (actionID, opts, cb) {
