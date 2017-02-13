@@ -30,7 +30,7 @@ dapple['dappsys'] = (function builder () {
           },
           'multisig_factory1': {
             'class': 'DSMultisigFactory',
-            'address': '0x0b30a24e7257e1842d681b0f2f8aff4182eb2a78'
+            'address': '0xda3b78a3261caed41f59dc3a9e83559e683c9d85'
           },
           'token_factory1': {
             'class': 'DSTokenFactory',
@@ -42,11 +42,11 @@ dapple['dappsys'] = (function builder () {
           },
           'factory1': {
             'class': 'DSFactory1',
-            'address': '0x3da0d9695d0099f98582f58a64b2e2616fcbaa00'
+            'address': '0x3c58df9a125b5f0de4d32689e5c0b24f971e16c5'
           },
-          'eth_token1': {
+          'eth_token': {
             'class': 'DSEthToken',
-            'address': '0xfbc7f6b58daa9f99816b6cc77d2a7f4b327fa7bc'
+            'address': '0x52fe88b987c7829e5d5a61c98f67c9c14e6a7a90'
           },
           'token_registry': {
             'class': 'DSTokenRegistry',
@@ -54,7 +54,7 @@ dapple['dappsys'] = (function builder () {
           },
           'multisig': {
             'class': 'DSEasyMultisig',
-            'address': '0x8592eE0C5Db5CaAD21e70D07c911Cc2a87E84775'
+            'address': '0xcd85c33878a7f378483c6422eee32631ea6f8001'
           },
           'echo': {
             'class': 'DSEcho',
@@ -74,7 +74,7 @@ dapple['dappsys'] = (function builder () {
           },
           'multisig_factory1': {
             'class': 'DSMultisigFactory',
-            'address': '0x82f39d996d1e9ab119e4b33d581c3eeb4133acf6'
+            'address': '0x580c2caa8796c0352a1e0e326fc1d2505f54381f'
           },
           'token_factory1': {
             'class': 'DSTokenFactory',
@@ -86,19 +86,27 @@ dapple['dappsys'] = (function builder () {
           },
           'factory1': {
             'class': 'DSFactory1',
-            'address': '0x2c139c5a8dd6be98067c5b4258e0dedcdbbff78b'
+            'address': '0x93779e2cb8448a24bede8da55f1dffbadbc585a9'
           },
-          'eth_token1': {
+          'eth_token': {
             'class': 'DSEthToken',
-            'address': '0xd654bdd32fc99471455e86c2e7f7d7b6437e9179'
+            'address': '0xecf8f87f810ecf450940c9f60066b4a7a501d6a7'
           },
           'token_registry': {
             'class': 'DSTokenRegistry',
             'address': '0xc6882fbffd309dc976dd6e4c79cc91e4c1482140'
           },
-          'multisig': {
+          'old_ms': {
             'class': 'DSEasyMultisig',
-            'address': '0x7bb0b08587b8a6b8945e09f1baca426558b0f06a'
+            'address': '0xe02640be68df835aa3327ea6473c02c8f6c3815a'
+          },
+          'root_auth': {
+              'class': 'DSAuthorized',
+              'address': '0x77a79a78c56504c6c1f7499852b6e1918a6d0ab4'
+          },
+          'multisig': {
+              'class': 'DSEasyMultisig',
+              'address': '0x7bb0b08587b8a6b8945e09f1baca426558b0f06a'
           },
           'echo': {
             'class': 'DSEcho',
@@ -1183,6 +1191,14 @@ dapple['dappsys'] = (function builder () {
               {
                 'name': 'triggered',
                 'type': 'bool'
+              },
+              {
+                'name': 'target',
+                'type': 'address'
+              },
+              {
+                'name': 'eth_value',
+                'type': 'uint256'
               }
             ],
             'type': 'function'
@@ -4519,7 +4535,7 @@ dapple['maker'] = (function builder () {
       contract = this._stringToContract(contract);
     }
 
-    var proposalData = this._constructProposalData(contract, func, args);
+    var proposalData = this._constructTransactionData(contract, func, args);
 
     // Check the last 10000 blocks for a proposal with the given action ID,
     // which should cover one whole voting round with some room to spare.
@@ -4570,7 +4586,9 @@ dapple['maker'] = (function builder () {
     return {
       'confirmations': statusArray[0],
       'expiration': new Date(statusArray[1] * 1000),
-      'triggered': statusArray[2]
+      'triggered': statusArray[2],
+      'target': statusArray[3],
+      'eth_value': statusArray[4]
     };
   };
 
@@ -4592,13 +4610,13 @@ dapple['maker'] = (function builder () {
   };
 
   MakerAdmin.prototype._stringToContract = function (contractName) {
-    if (!(contract in this._dappsys.objects)) {
-      throw new Error('Unrecognized contract name: ' + contract);
+    if (!(contractName in this._dappsys.objects)) {
+      throw new Error('Unrecognized contract name: ' + contractName);
     }
-    return this._dappsys.objects[contract];
+    return this._dappsys.objects[contractName];
   };
 
-  MakerAdmin.prototype._constructProposalData = function (
+  MakerAdmin.prototype._constructTransactionData = function (
       contract, func, args) {
     if (!(func in contract)) {
       throw new Error('Unrecognized function name: ' + func);
@@ -4675,6 +4693,12 @@ dapple['maker'] = (function builder () {
     this._web3 = web3;
     this.dappsys = new dapple.dappsys.class(web3, environment);
     this.admin = new MakerAdmin(this);
+  };
+
+  Maker.prototype.object = function (className, address) {
+    var contract = this.dappsys.classes[className].at(address);
+    contract.abi = this.dappsys.headers[className].interface;
+    return contract;
   };
 
   Maker.prototype.getToken = function (symbol) {
